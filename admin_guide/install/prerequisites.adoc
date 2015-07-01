@@ -65,6 +65,10 @@ endif::[]
 - 1 vCPU
 - Minimum 8 GB RAM
 - Minimum 15 GB hard disk space
+ifdef::openshift-enterprise[]
+- Minimum 15 GB unallocated space to be configured via *docker-storage-setup*, see *Configuring Docker
+  Storage* below
+endif::[]
 |===
 
 [[security-warning]]
@@ -240,7 +244,8 @@ to use that volume.
 You can use the *docker-storage-setup* script to create a thin-pool device and
 configure Docker's storage driver after installing Docker but before you start
 using it. The script reads configuration options from the
-*_/etc/sysconfig/docker-storage-setup_* file.
+*_/etc/sysconfig/docker-storage-setup_* file. Please allocate at least 15GB of
+space no matter which option you choose.
 
 . Configure *docker-storage-setup* for your environment. There are three options
 available based on your storage configuration:
