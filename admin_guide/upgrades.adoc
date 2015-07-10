@@ -1,0 +1,102 @@
+= Upgrading OpenShift
+{product-author}
+{product-version}
+:data-uri:
+:icons:
+:experimental:
+:toc: macro
+:toc-title:
+:prewrap!:
+
+toc::[]
+
+== Overview
+In order to upgrade your OpenShift environment without disruption it is
+important to upgrade components as documented in this guide. Specific versions
+may require additional steps and those will be outlined in version specific
+section. Please be sure to familiarize yourself with the entire procedure before
+you begin your upgrade.
+
+[NOTE]
+====
+This documentation pertains to installations that make use of RPMs and does not
+currently cover container based installations.
+====
+
+== General Procedures
+. Upgrade your masters first and review master logs to ensure services have been
+restarted successfully.
+
+----
+yum upgrade openshift-master
+systemctl restart openshift-master
+journalctl -r -u openshift-master
+----
+
+. Upgrade your nodes
+You may either upgrade your nodes or add additional nodes and migrate pods to
+the new nodes using `oadm manage-node`. For now we'll only document upgrading
+nodes in place.
+
+When restarting a node there will be a brief disruption of network routing
+via services as the kube proxy is restarted.
+
+----
+yum upgrade openshift\*
+sytemctl restart openshift-node
+----
+
+. Verify that all nodes are showing as ready
+
+----
+oc get nodes
+NAME                      LABELS                                           STATUS
+ose3-master.example.com   kubernetes.io/hostname=ose3-master.example.com   Ready,SchedulingDisabled
+ose3-node1.example.com    kubernetes.io/hostname=ose3-node1.example.com    Ready
+ose3-node2.example.com    kubernetes.io/hostname=ose3-node2.example.com    Ready
+----
+
+
+. Upgrade your router
+The router must be updated in order to realize changes made to the router. Edit
+the deployment config to update the image version to the correct version.
+
+----
+oc edit dc/docker-registry
+----
+
+[NOTE]
+We need a lot of work here. If the router is restricted in placement to just one
+node as we've documented in many places it will never restart due to pod fit
+violations when trying to find a host that allows ports to be bound. Perhaps the
+only way to do this smoothly is using ip failover and ensuring you have an
+additional host available to accept a new router?
+
+. Upgrade your registry
+The registry must also be restarted in order to realize changes in the registry
+image. If you have used a `*PersistentVolumeClaim*` or a host mount point you
+may restart the registry without losing the contents. The
+link:install/docker_registry.html#storage-for-the-registry[registry installation]
+documentation details how to configure persistent storage.
+
+. Other images
+All other images will be updated without administrator action during the normal
+application lifecycle.
+
+[NOTE] Hmmm, what about image stream content? mysqldb, mongodb fixes etc?
+
+== Version Specific Steps
+ifdef::openshift-enterprise[]
+=== OSE 3.0.0.0 to 3.0.1.0
+Perhaps this should go in release notes
+endif:[]
+ifdef::openshift-origin[]
+=== OpenShift Origin 1.0.0 to 1.0.1
+Perhaps this should go in release notes
+endif:[]
+
+== TODO
+* Once the installer allows you to add nodes, document adding additional capacity
+then tearing down old nodes rather than upgrading nodes in place.
+* Quantify the impact of kube proxy restarts on a moderately sized node, how
+long are services busted, what happens etc.

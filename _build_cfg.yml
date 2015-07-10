@@ -136,6 +136,8 @@ Topics:
         File: deploy_router
       - Name: First Steps
         File: first_steps
+  - Name: Upgrading OpenShift
+    File: upgrades
   - Name: Master and Node Configuration
     File: master_node_configuration
   - Name: Managing Nodes
