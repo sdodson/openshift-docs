@@ -12,15 +12,16 @@ toc::[]
 
 == Overview
 In order to upgrade your OpenShift environment without disruption it is
-important to upgrade components as documented in this guide. Specific versions
-may require additional steps and those will be outlined in version specific
-section. Please be sure to familiarize yourself with the entire procedure before
-you begin your upgrade.
+important to upgrade components as documented in this guide. Please be sure to
+familiarize yourself with the entire procedure before you begin your upgrade.
+Specific versions may require additional steps and those will be outlined in
+version specific section.
 
 Unless specifically noted, node and master versions within a major version are
 forward and backward compatible so upgrading a cluster should go smoothly.
 However, you should not run mismatched versions longer than necessary to upgrade
 the entire cluster.
+
 
 [NOTE]
 ====
@@ -28,32 +29,32 @@ This documentation pertains to installations that make use of RPMs and does not
 currently cover container based installations.
 ====
 
-== General Procedures
-. Upgrade your masters first and review master logs to ensure services have been
+=== Masters
+Upgrade your masters first and review master logs to ensure services have been
 restarted successfully.
-+
+
 ----
 yum upgrade openshift-master
 systemctl restart openshift-master
 journalctl -r -u openshift-master
 ----
 
-. Upgrade your nodes
+=== Nodes
 You may either upgrade your nodes or add additional nodes and migrate pods to
 the new nodes using `oadm manage-node`. For now we'll only document upgrading
 nodes in place.
-+
+
 When restarting a node there will be a brief disruption of outbound network routing
 from running pods to services while the kube proxy is restarted. The length of this
 disruption should be very short and will scale based on the number of services in
 the entire cluster.
-+
+
 ----
 yum upgrade openshift\*
 sytemctl restart openshift-node
 ----
 
-. Verify that all nodes are showing as ready
+=== Verify that all nodes are showing as ready
 ----
 oc get nodes
 NAME                      LABELS                                           STATUS
@@ -62,14 +63,13 @@ ose3-node1.example.com    kubernetes.io/hostname=ose3-node1.example.com    Ready
 ose3-node2.example.com    kubernetes.io/hostname=ose3-node2.example.com    Ready
 ----
 
-
-. Upgrade your router
+=== Router
 The router deployment config must be upgraded in order to apply updates contained
 in the router image.
 [IMPORTANT]
 In order to upgrade your router without disrupting services you need to have
 deployed a link:high_availability.html#configuring-a-highly-available-routing-service[Highly-available Routing Service]/
-+
+
 ----
 oc edit dc/router
 ----
@@ -94,26 +94,29 @@ spec:
     type: Rolling
 ..
 ----
+
 Next update the image version to match the version you're upgrading to, ie: 'v3.0.1.0'
+
 ----
         image: docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-haproxy-router:v3.0.1.0
         imagePullPolicy: IfNotPresent
 ----
+
 You should see one router pod updated and then the next.
 
-. Upgrade your registry
+=== Registry
 The registry must also be upgraded in order to realize changes in the registry
 image. If you have used a `*PersistentVolumeClaim*` or a host mount point you
-may restart the registry without losing the contents. The
+may restart the registry without losing the contents of your registry. The
 link:install/docker_registry.html#storage-for-the-registry[registry installation]
 documentation details how to configure persistent storage.
-+
+
 Set the image version according to the version you're upgrading to, ie: 'v3.0.1.0'
-+
+
 ----
 oc edit dc/docker-registry
 ----
-+
+
 ----
         image: docker-buildvm-rhose.usersys.redhat.com:5000/openshift3/ose-docker-registry:v3.0.1.0
         imagePullPolicy: IfNotPresent
@@ -123,29 +126,22 @@ Images that are being pushed or pulled from the internal registry at the time of
 upgrade will fail and should be restarted automatically. This will not disrupt
 already running pods.
 
-. Updating S2I and Database ImageStreams
-You may also wish to ensure that your database and s2i image streams are updated.
+=== Updating ImageStreams
+You may also wish to ensure that your database and S2I ImageStreams are updated.
 For each image stream in your openshift namespace run `oc image-import`.
 [NOTE]
-This will trigger a rebuild of all images built from these image streams. Please
-ensure that all pods that persist data have properly configured persistent volumes.
-Pods with replica count greater than will be updated in a rolling manner.
-+
+This will trigger a rebuild of all images built from these image streams due to
+the ImageChange trigger. Please ensure that all pods that persist data have
+properly configured persistent volumes. Pods with replica count greater than  one
+will be updated in a rolling manner.
+
 ----
 # oc get is -n openshift
 NAME                                 DOCKER REPO                                                      TAGS                   UPDATED
-jboss-amq-6                          registry.access.redhat.com/jboss-amq-6/amq-openshift             6.2,6.2-84,latest      16 hours ago
-jboss-eap6-openshift                 registry.access.redhat.com/jboss-eap-6/eap-openshift             6.4,6.4-207,latest     16 hours ago
-jboss-webserver3-tomcat7-openshift   registry.access.redhat.com/jboss-webserver-3/tomcat7-openshift   3.0,3.0-135,latest     16 hours ago
-jboss-webserver3-tomcat8-openshift   registry.access.redhat.com/jboss-webserver-3/tomcat8-openshift   3.0,3.0-137,latest     16 hours ago
 mongodb                              registry.access.redhat.com/openshift3/mongodb-24-rhel7           2.4,latest,v3.0.0.0    16 hours ago
 mysql                                registry.access.redhat.com/openshift3/mysql-55-rhel7             5.5,latest,v3.0.0.0    16 hours ago
 nodejs                               registry.access.redhat.com/openshift3/nodejs-010-rhel7           0.10,latest,v3.0.0.0   16 hours ago
-perl                                 registry.access.redhat.com/openshift3/perl-516-rhel7             5.16,latest,v3.0.0.0   16 hours ago
-php                                  registry.access.redhat.com/openshift3/php-55-rhel7               5.5,latest,v3.0.0.0    16 hours ago
-postgresql                           registry.access.redhat.com/openshift3/postgresql-92-rhel7        9.2,latest,v3.0.0.0    16 hours ago
-python                               registry.access.redhat.com/openshift3/python-33-rhel7            3.3,latest,v3.0.0.0    16 hours ago
-ruby                                 registry.access.redhat.com/openshift3/ruby-20-rhel7              2.0,latest,v3.0.0.0    16 hours ago
+...
 
 # oc import-image -n openshift nodejs
 Waiting for the import to complete, CTRL+C to stop waiting.
@@ -167,11 +163,11 @@ v3.0.0.0        <pushed>        16 hours ago    registry.access.redhat.com/opens
 ifdef::openshift-enterprise[]
 === OSE 3.0.0.0 to 3.0.1.0
 Perhaps this should go in release notes
-endif:[]
+endif::[]
 ifdef::openshift-origin[]
 === OpenShift Origin 1.0.0 to 1.0.1
 Perhaps this should go in release notes
-endif:[]
+endif::[]
 
 == TODO
 * Once the installer allows you to add nodes, document adding additional capacity
