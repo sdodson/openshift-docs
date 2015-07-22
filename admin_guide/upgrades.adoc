@@ -38,6 +38,21 @@ systemctl restart openshift-master
 journalctl -r -u openshift-master
 ----
 
+=== Update policy definitions
+After a product update, the recommended default roles may be updated. To check
+if an update is recommended for your environment, you can run `oadm policy
+reconcile-cluster-roles`. This command will output a list of roles that are out
+of date and their new values. You may either take this output, modify, and
+apply it yourself or you may run `oadm policy reconcile-cluster-roles --confirm`
+and automatically apply the changes.
+
+----
+# oadm policy reconcile-cluster-roles
+### Example output TODO
+# oadm policy reconcile-cluster-roles --confirm
+### Example output TODO
+----
+
 === Nodes
 When restarting a node there will be a brief disruption of outbound network
 connectivity from running pods to services while the kube proxy is restarted.
