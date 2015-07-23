@@ -42,15 +42,31 @@ journalctl -r -u openshift-master
 After a product update, the recommended default roles may be updated. To check
 if an update is recommended for your environment, you can run `oadm policy
 reconcile-cluster-roles`. This command will output a list of roles that are out
-of date and their new values. You may either take this output, modify, and
-apply it yourself or you may run `oadm policy reconcile-cluster-roles --confirm`
-and automatically apply the changes.
+of date and their new values. You may either modify this output to re-apply
+local policy changes you've made or automatically apply the new policy by running
+`oadm policy reconcile-cluster-roles --confirm`.
 
 ----
 # oadm policy reconcile-cluster-roles
-### Example output TODO
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: ClusterRole
+  metadata:
+    creationTimestamp: null
+    name: admin
+  rules:
+  - attributeRestrictions: null
+    resources:
+    - builds/custom
+...
+---
+
+[NOTE] Your output will vary based on version and any local customizations you
+have made. Please review the proposed policy carefully.
+
+---
 # oadm policy reconcile-cluster-roles --confirm
-### Example output TODO
 ----
 
 === Nodes
