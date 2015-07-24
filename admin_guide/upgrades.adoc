@@ -77,7 +77,7 @@ number of services in the entire cluster.
 
 ----
 yum upgrade openshift\*
-sytemctl restart openshift-node
+systemctl restart openshift-node
 ----
 
 ==== Verify that all nodes are showing as ready
@@ -186,13 +186,61 @@ v3.0.0.0        <pushed>        16 hours ago    registry.access.redhat.com/opens
 ----
 
 == Version Specific Steps
+
 ifdef::openshift-enterprise[]
 === OSE 3.0.0.0 to 3.0.1.0
-Perhaps this should go in release notes
+==== Router service account creation
+The router was updated to utilize host ports in OpenShift Enterprise 3.0.1.0 and
+requires that a service account be created and made a member of the privileged
+link:../manage_scc.html[security context constraint].
+
+After upgrading your master and nodes but before updating to the newer router,
+create the service account. As a cluster admin ensure you're in the default
+project, create the service account, and update the SCC.
+
+----
+# oc project default
+# oc delete serviceaccount/router
+serviceaccounts/router
+# echo '{"kind":"ServiceAccount","apiVersion":"v1","metadata":{"name":"router"}}' | oc create -f -
+serviceaccounts/router
+# oc edit scc privileged
+----
+Add the service account you created to the users list at the end of the file
+and save the changes.
+----
+users:
+- system:serviceaccount:openshift-infra:build-controller
+- system:serviceaccount:default:router
+----
 endif::[]
+
 ifdef::openshift-origin[]
-=== OpenShift Origin 1.0.0 to 1.0.1
-Perhaps this should go in release notes
+=== OpenShift Origin 1.0.3 to 1.0.4
+==== Router service account creation
+The router was updated to utilize host ports in OpenShift Origin 1.0.4 and
+requires that a service account be created and made a member of the privileged
+link:../manage_scc.html[security context constraint].
+
+After upgrading your master and nodes but before updating to the newer router,
+create the service account. As a cluster admin ensure you're in the default
+project, create the service account, and update the SCC.
+
+----
+# oc project default
+# oc delete serviceaccount/router
+serviceaccounts/router
+# echo '{"kind":"ServiceAccount","apiVersion":"v1","metadata":{"name":"router"}}' | oc create -f -
+serviceaccounts/router
+# oc edit scc privileged
+----
+Add the service account you created to the users list at the end of the file
+and save the changes.
+----
+users:
+- system:serviceaccount:openshift-infra:build-controller
+- system:serviceaccount:default:router
+----
 endif::[]
 
 == TODO
