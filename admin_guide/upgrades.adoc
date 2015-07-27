@@ -11,6 +11,18 @@
 toc::[]
 
 == Overview
+When new versions of OpenShift are released, you can upgrade your cluster to
+apply the latest enhancements and bug fixes.
+ifdef::openshift-origin[]
+For OpenShift Origin, see the
+link:https://github.com/openshift/origin/releases[Releases page] on GitHub  to
+review the latest changes.
+endif::[]
+ifdef::openshift-enterprise[]
+See the link:../whats_new/ose_3_0_release_notes.html[OpenShift Enterprise 3.0
+Release Notes] to review the latest changes.
+endif::[]
+
 To upgrade your OpenShift cluster without disruption, it is important to upgrade
 components as documented in this topic. Before you begin your upgrade,
 familiarize yourself with the entire procedure.
@@ -292,7 +304,7 @@ you may be required to perform certain steps and key points during the standard
 upgrade process described earlier in this topic.
 
 ifdef::openshift-enterprise[]
-=== OpenShift Enterprise 3.0.0.0 to 3.0.1.0
+=== OpenShift Enterprise 3.0.1.0
 
 *Creating a Service Account for the Router*
 
@@ -372,7 +384,7 @@ upgrade steps].
 endif::[]
 
 ifdef::openshift-origin[]
-=== OpenShift Origin 1.0.3 to 1.0.4
+=== OpenShift Origin 1.0.4
 
 *Creating a Service Account for the Router*
 
