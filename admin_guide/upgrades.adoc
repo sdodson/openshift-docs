@@ -37,9 +37,14 @@ cluster.
 
 [NOTE]
 ====
-This topic pertains to RPM-based installations (i.e., the
-link:install/quick_install.html[quick] and
-link:install/advanced_install.html[advanced installation] methods) only and does
+This topic pertains to RPM-based installations only
+ifdef::openshift-enterprise[]
+(i.e., the link:install/quick_install.html[quick] and link:install/advanced_install.html[advanced installation] methods)
+endif::[]
+ifdef::openshift-origin[]
+(i.e., the link:install/advanced_install.html[advanced installation] method)
+endif::[]
+ and does
 not currently cover container-based installations.
 ====
 
@@ -120,13 +125,13 @@ scales based on the number of services in the entire cluster.
 On each node host, upgrade all *openshift* packages:
 
 ----
-yum upgrade openshift\*
+# yum upgrade openshift\*
 ----
 
 Then, restart the *openshift-node* service:
 
 ----
-systemctl restart openshift-node
+# systemctl restart openshift-node
 ----
 
 As a user with *cluster-admin* privileges, verify that all nodes are showing as
@@ -182,7 +187,7 @@ spec:
         ..
 ----
 ====
-<1> Adjust image version to match the version you're upgrading to.
+<1> Adjust the image version to match the version you are upgrading to.
 
 You should see one router pod updated and then the next.
 
@@ -198,7 +203,7 @@ installation] topic details how to configure persistent storage.
 Edit your registry's deployment configuration:
 
 ----
-oc edit dc/docker-registry
+# oc edit dc/docker-registry
 ----
 
 Apply the following changes:
@@ -216,7 +221,7 @@ spec:
         ..
 ----
 ====
-<1> Adjust image version to match the version you're upgrading to.
+<1> Adjust the image version to match the version you are upgrading to.
 
 [IMPORTANT]
 ====
@@ -334,6 +339,8 @@ Edit the *privileged* SCC:
 ----
 ====
 
+Apply the following changes:
+
 ====
 ----
 allowHostDirVolumePlugin: true
@@ -346,8 +353,8 @@ users:
 - system:serviceaccount:default:router <3>
 ----
 ====
-<1> Add or update `allowHostNetwork: true`
-<2> Add or update `allowHostPorts: true`
+<1> Add or update `allowHostNetwork: true`.
+<2> Add or update `allowHostPorts: true`.
 <3> Add the service account you created to the user list at the end of the file.
 
 Edit your router's deployment configuration:
@@ -385,8 +392,8 @@ spec:
 ----
 ====
 <1> Add `updatePercent: -10` to allow down-then-up rolling upgrades.
-<2> Add `serviceAccount: router` to the template spec.
-<3> Add `serviceAccountName: router` to the template spec.
+<2> Add `serviceAccount: router` to the template `*spec*`.
+<3> Add `serviceAccountName: router` to the template `*spec*`.
 
 Now upgrade your router per the link:#upgrading-the-router[standard router
 upgrade steps].
