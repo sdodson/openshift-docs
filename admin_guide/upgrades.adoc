@@ -172,10 +172,6 @@ is equal to the number of nodes that match the selector for your router; for
 example, if `*replicas: 2*` and you have specified `zone=infra` with only two
 nodes that match that value.
 
-TODO
-
-Need to update this after https://github.com/openshift/origin/pull/3701 merges.
-
 ====
 ----
 ..
@@ -189,20 +185,23 @@ spec:
       intervalSeconds: 1
       timeoutSeconds: 120
       updatePeriodSeconds: 1
+      updatePercent: -10 <1>
     type: Rolling
-..
+    ..
+  template:
+    spec:
+      containers:
+      - env:
+        ..
+        - name: STATS_USERNAME
+          value: admin
+        image: openshift3/ose-haproxy-router:v3.0.1.0 <2>
+        imagePullPolicy: IfNotPresent
+        ..
 ----
 ====
-
-Update the image version to match the version you are upgrading to, for example
-*v3.0.1.0*:
-
-====
-----
-image: openshift3/ose-haproxy-router:v3.0.1.0
-imagePullPolicy: IfNotPresent
-----
-====
+<1> Add `updatePercent: -10` to allow down-then-up rolling deployments.
+<2> Adjust image version to match the version you're upgrading to.
 
 You should see one router pod updated and then the next.
 
@@ -341,16 +340,14 @@ Edit the *privileged* SCC:
 ----
 ====
 
-Add the service account you created to the users list at the end of the file,
-then save the changes:
-
 ====
 ----
 users:
 - system:serviceaccount:openshift-infra:build-controller
-- system:serviceaccount:default:router
+- system:serviceaccount:default:router <1>
 ----
 ====
+<1> Add the service account you created to the user list at the end of the file.
 
 Edit your router's deployment configuration:
 
@@ -373,11 +370,13 @@ Apply the following changes:
         terminationMessagePath: /dev/termination-log
       dnsPolicy: ClusterFirst
       restartPolicy: Always
-      serviceAccount: router
-      serviceAccountName: router
+      serviceAccount: router <1>
+      serviceAccountName: router <2>
 ...
 ----
 ====
+<1> Add `serviceAccount: router`
+<2> Add `serviceAccountName: router`
 
 Now upgrade your router per the link:#upgrading-the-router[standard router
 upgrade steps].
@@ -422,16 +421,14 @@ Edit the *privileged* SCC:
 ----
 ====
 
-Add the service account you created to the users list at the end of the file,
-then save the changes:
-
 ====
 ----
 users:
 - system:serviceaccount:openshift-infra:build-controller
-- system:serviceaccount:default:router
+- system:serviceaccount:default:router <1>
 ----
 ====
+<1> Add the service account you created to the user list at the end of the file.
 
 Edit your router's deployment configuration:
 
@@ -454,18 +451,14 @@ Apply the following changes:
         terminationMessagePath: /dev/termination-log
       dnsPolicy: ClusterFirst
       restartPolicy: Always
-      serviceAccount: router
-      serviceAccountName: router
+      serviceAccount: router <1>
+      serviceAccountName: router <2>
 ...
 ----
 ====
+<1> Add `serviceAccount: router`
+<2> Add `serviceAccountName: router`
 
 Now upgrade your router per the link:#upgrading-the-router[standard router
 upgrade steps].
 endif::[]
-
-== TODO
-* Once the installer allows you to add nodes, document adding additional capacity
-then tearing down old nodes rather than upgrading nodes in place.
-* Quantify the impact of kube proxy restarts on a moderately sized node, how
-long are services busted, what happens etc.
