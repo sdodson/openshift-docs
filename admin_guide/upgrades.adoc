@@ -196,7 +196,8 @@ link:../manage_scc.html[security context constraint].
 
 After upgrading your master and nodes but before updating to the newer router,
 create the service account. As a cluster admin ensure you're in the default
-project, create the service account, and update the SCC.
+project, create the service account, update the SCC, and add the service-account
+to the router deployment config.
 
 ----
 # oc project default
@@ -213,6 +214,25 @@ users:
 - system:serviceaccount:openshift-infra:build-controller
 - system:serviceaccount:default:router
 ----
+Edit your router deployment config.
+----
+# oc edit dc/router
+----
+...
+        - containerPort: 1936
+          hostPort: 1936
+          name: stats
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      serviceAccount: router
+      serviceAccountName: router
+...
+----
+Now upgrade your router per the standard upgrade steps.
+
 endif::[]
 
 ifdef::openshift-origin[]
@@ -224,7 +244,8 @@ link:../manage_scc.html[security context constraint].
 
 After upgrading your master and nodes but before updating to the newer router,
 create the service account. As a cluster admin ensure you're in the default
-project, create the service account, and update the SCC.
+project, create the service account, update the SCC, and add the service-account
+to the router deployment config.
 
 ----
 # oc project default
@@ -241,6 +262,24 @@ users:
 - system:serviceaccount:openshift-infra:build-controller
 - system:serviceaccount:default:router
 ----
+Edit your router deployment config.
+----
+# oc edit dc/router
+----
+...
+        - containerPort: 1936
+          hostPort: 1936
+          name: stats
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      serviceAccount: router
+      serviceAccountName: router
+...
+----
+Now upgrade your router per the standard upgrade steps.
 endif::[]
 
 == TODO
