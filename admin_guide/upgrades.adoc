@@ -292,11 +292,15 @@ upgrade process described earlier in this topic.
 
 ifdef::openshift-enterprise[]
 === OpenShift Enterprise 3.0.1.0
+endif::[]
+ifdef::openshift-origin[]
+=== OpenShift Origin 1.0.4
+endif::[]
 
 *Creating a Service Account for the Router*
 
-The router was updated to utilize host ports in OpenShift Enterprise 3.0.1.0 and
-requires that a service account be created and made a member of the privileged
+The router was updated to utilize host ports and requires that a service
+account be created and made a member of the privileged
 link:manage_scc.html[security context constraint] (SCC). Additionally,
 'down-then-up' rolling upgrades have been added and is now the preferred
 strategy for upgrading routers.
@@ -379,94 +383,3 @@ spec:
 
 Now upgrade your router per the link:#upgrading-the-router[standard router
 upgrade steps].
-endif::[]
-
-ifdef::openshift-origin[]
-=== OpenShift Origin 1.0.4
-
-*Creating a Service Account for the Router*
-
-The router was updated to utilize host ports in OpenShift Origin 1.0.4 and
-requires that a service account be created and made a member of the privileged
-link:manage_scc.html[security context constraint] (SCC).
-
-After upgrading your master and nodes but before updating to the newer router,
-you must create a service account for the router. As a cluster administrator,
-ensure you are operating on the *default* project:
-
-====
-----
-# oc project default
-----
-====
-
-Delete any existing *router* service account and create a new one:
-
-====
-----
-# oc delete serviceaccount/router
-serviceaccounts/router
-
-# echo '{"kind":"ServiceAccount","apiVersion":"v1","metadata":{"name":"router"}}' | oc create -f -
-serviceaccounts/router
-----
-====
-
-Edit the *privileged* SCC:
-
-====
-----
-# oc edit scc privileged
-----
-====
-
-====
-----
-users:
-- system:serviceaccount:openshift-infra:build-controller
-- system:serviceaccount:default:router <1>
-----
-====
-<1> Add the service account you created to the user list at the end of the file.
-
-Edit your router's deployment configuration:
-
-====
-----
-# oc edit dc/router
-----
-====
-
-Apply the following changes:
-
-====
-----
-spec:
-  replicas: 2
-  selector:
-    router: router
-  strategy:
-    resources: {}
-    rollingParams:
-      intervalSeconds: 1
-      timeoutSeconds: 120
-      updatePeriodSeconds: 1
-      updatePercent: -10 <1>
-    type: Rolling
-    ..
-    spec:
-      ..
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      serviceAccount: router <2>
-      serviceAccountName: router <3>
-...
-----
-====
-<1> Add `updatePercent: -10` to allow down-then-up rolling upgrades.
-<2> Add `serviceAccount: router` to the template spec.
-<3> Add `serviceAccountName: router` to the template spec.
-
-Now upgrade your router per the link:#upgrading-the-router[standard router
-upgrade steps].
-endif::[]
