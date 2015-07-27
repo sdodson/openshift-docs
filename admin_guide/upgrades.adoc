@@ -166,42 +166,23 @@ Edit your router's deployment configuration. For example, if it has the default
 ----
 ====
 
-If necessary, adjust the `*rollingParams*` parameter so that it is set to
-*down-then-up* to allow rolling upgrades. This is necessary if the replica count
-is equal to the number of nodes that match the selector for your router; for
-example, if `*replicas: 2*` and you have specified `zone=infra` with only two
-nodes that match that value.
+Apply the following changes:
 
 ====
 ----
 ..
 spec:
-  replicas: 2
-  selector:
-    router: router
-  strategy:
-    resources: {}
-    rollingParams:
-      intervalSeconds: 1
-      timeoutSeconds: 120
-      updatePeriodSeconds: 1
-      updatePercent: -10 <1>
-    type: Rolling
-    ..
-  template:
+ template:
     spec:
       containers:
       - env:
         ..
-        - name: STATS_USERNAME
-          value: admin
-        image: openshift3/ose-haproxy-router:v3.0.1.0 <2>
+        image: openshift3/ose-haproxy-router:v3.0.1.0 <1>
         imagePullPolicy: IfNotPresent
         ..
 ----
 ====
-<1> Add `updatePercent: -10` to allow down-then-up rolling deployments.
-<2> Adjust image version to match the version you're upgrading to.
+<1> Adjust image version to match the version you're upgrading to.
 
 You should see one router pod updated and then the next.
 
@@ -220,15 +201,22 @@ Edit your registry's deployment configuration:
 oc edit dc/docker-registry
 ----
 
-Update the image version to match the version you are upgrading to, for example
-*v3.0.1.0*:
+Apply the following changes:
 
 ====
 ----
-image: openshift3/ose-docker-registry:v3.0.1.0
-imagePullPolicy: IfNotPresent
+spec:
+ template:
+    spec:
+      containers:
+      - env:
+        ..
+        image: openshift3/ose-docker-registry:v3.0.1.0 <1>
+        imagePullPolicy: IfNotPresent
+        ..
 ----
 ====
+<1> Adjust image version to match the version you're upgrading to.
 
 [IMPORTANT]
 ====
@@ -309,7 +297,9 @@ ifdef::openshift-enterprise[]
 
 The router was updated to utilize host ports in OpenShift Enterprise 3.0.1.0 and
 requires that a service account be created and made a member of the privileged
-link:manage_scc.html[security context constraint] (SCC).
+link:manage_scc.html[security context constraint] (SCC). Additionally,
+'down-then-up' rolling upgrades have been added and is now the preferred
+strategy for upgrading routers.
 
 After upgrading your master and nodes but before updating to the newer router,
 you must create a service account for the router. As a cluster administrator,
@@ -361,22 +351,31 @@ Apply the following changes:
 
 ====
 ----
-...
-        - containerPort: 1936
-          hostPort: 1936
-          name: stats
-          protocol: TCP
-        resources: {}
-        terminationMessagePath: /dev/termination-log
+spec:
+  replicas: 2
+  selector:
+    router: router
+  strategy:
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      timeoutSeconds: 120
+      updatePeriodSeconds: 1
+      updatePercent: -10 <1>
+    type: Rolling
+    ..
+    spec:
+      ..
       dnsPolicy: ClusterFirst
       restartPolicy: Always
-      serviceAccount: router <1>
-      serviceAccountName: router <2>
+      serviceAccount: router <2>
+      serviceAccountName: router <3>
 ...
 ----
 ====
-<1> Add `serviceAccount: router`
-<2> Add `serviceAccountName: router`
+<1> Add `updatePercent: -10` to allow down-then-up rolling upgrades.
+<2> Add `serviceAccount: router` to the template spec.
+<3> Add `serviceAccountName: router` to the template spec.
 
 Now upgrade your router per the link:#upgrading-the-router[standard router
 upgrade steps].
@@ -442,22 +441,31 @@ Apply the following changes:
 
 ====
 ----
-...
-        - containerPort: 1936
-          hostPort: 1936
-          name: stats
-          protocol: TCP
-        resources: {}
-        terminationMessagePath: /dev/termination-log
+spec:
+  replicas: 2
+  selector:
+    router: router
+  strategy:
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      timeoutSeconds: 120
+      updatePeriodSeconds: 1
+      updatePercent: -10 <1>
+    type: Rolling
+    ..
+    spec:
+      ..
       dnsPolicy: ClusterFirst
       restartPolicy: Always
-      serviceAccount: router <1>
-      serviceAccountName: router <2>
+      serviceAccount: router <2>
+      serviceAccountName: router <3>
 ...
 ----
 ====
-<1> Add `serviceAccount: router`
-<2> Add `serviceAccountName: router`
+<1> Add `updatePercent: -10` to allow down-then-up rolling upgrades.
+<2> Add `serviceAccount: router` to the template spec.
+<3> Add `serviceAccountName: router` to the template spec.
 
 Now upgrade your router per the link:#upgrading-the-router[standard router
 upgrade steps].
