@@ -1,0 +1,134 @@
+= Airgapped Installation using Satellite 6.1+
+{product-author}
+{product-version}
+:icons: font
+:experimental:
+:toc: macro
+:toc-title:
+:prewrap!:
+:description: Installing OpenShift in an air gapped environment utilizing Satellite 6
+:keywords: install, satellite
+
+toc::[]
+
+== Overview
+This document describes how to deploy OpenShift in an environment that's disconnected
+from the Internet making use of http://www.redhat.com/en/technologies/linux-platforms/satellite[Satellite 6.1's]
+ability to mirror container images and yum repos. In this document the procedures
+we describe make use of a https://access.redhat.com/documentation/en-US/Red_Hat_Satellite/6.0/html/User_Guide/sect-Connected_Satellite.html[Connected Satellite]
+additional steps may be necessary to implement this solution using a
+https://access.redhat.com/documentation/en-US/Red_Hat_Satellite/6.0/html/User_Guide/sect-Disconnected_Satellite.html[Disconnected Satellite].
+
+This document assumes basic familiarity with the following Satellite 6 topics
+
+* https://access.redhat.com/documentation/en-US/Red_Hat_Satellite/6.0/html/User_Guide/chap-Using_Content_Management.html[Content Management]
+* https://access.redhat.com/documentation/en-US/Red_Hat_Satellite/6.0/html/User_Guide/chap-Configuring_Organizations_Locations_and_Lifecycle_Environments.html[Organizations]
+* https://access.redhat.com/documentation/en-US/Red_Hat_Satellite/6.0/html/User_Guide/sect-Locations.html[Locations]
+* https://access.redhat.com/documentation/en-US/Red_Hat_Satellite/6.0/html/User_Guide/sect-Lifecycle_Environments.html[Lifecycle Environments]
+
+== Satellite Preparation
+In order to run OpenShift utilizing content from a satellite you'll need to mirror
+both yum repositories containing the OpenShift RPMs and the container images that
+run various OpenShift components. Synchronizing both of these content sets will
+require up to 50GB of free space on your satellite.
+
+First create a https://access.redhat.com/management/distributors?type=satellite[Satellite Manifest]
+with the desired number of OpenShift Enterprise Entitlements and import that into
+your Satellite environment.
+
+After importing the manifest begin synchronizing the following repositories :
+
+* Red Hat Enterprise Linux 7 Server RPMs x86_64 7Server
+* Red Hat Enterprise Linux 7 Server - Extras RPMs x86_64
+* Red Hat Enterprise Linux 7 Server - Optional RPMs x86_64 7Server
+* Red Hat OpenShift Enterprise 3.0 RPMs x86_64 7Server
+
+Next create a new product for the container images by selecting *Content* then
+*Products*, we'll name ours _OpenShift Images_ the label will be named _OpenShift_Images_.
+If you don't already have a sync plan you may create one here. Because the OpenShift
+product version is tied directly to image versions it'd be wise to use the same sync
+plan for both the images and the yum repositories.
+
+Now that the product has been created switch to the command line and we'll automate
+creation of the repositories there. On your satellite host run a script like the following
+to create all the necessary image repositories and initilize a first synchronization.
+Alter the *USER*, *PASSWORD*, *ORGANIZATION*, and *PRODUCT* values to match your
+configuration.
+
+----
+#!/bin/bash
+USER='admin'
+PASSWORD='redhat'
+ORGANIZATION='OpenShift'
+PRODUCT='OpenShift Images'
+
+ose3_base_repos="openshift3/mongodb-24-rhel7 openshift3/mysql-55-rhel7 openshift3/nodejs-010-rhel7 openshift3/ose-deployer openshift3/ose-docker-builder openshift3/ose-docker-registry openshift3/ose-haproxy-router openshift3/ose-keepalived-ipfailover openshift3/ose-pod openshift3/ose-sti-builder openshift3/ose-sti-image-builder openshift3/perl-516-rhel7 openshift3/php-55-rhel7 openshift3/postgresql-92-rhel7 openshift3/python-33-rhel7 openshift3/ruby-20-rhel7"
+ose3_s2i_repos="openshift3/nodejs-010-rhel7 openshift3/perl-516-rhel7 openshift3/php-55-rhel7  openshift3/python-33-rhel7 openshift3/ruby-20-rhel7"
+xpaas_repos="jboss-webserver-3/tomcat7-openshift jboss-webserver-3/tomcat8-openshift jboss-eap-6/eap-openshift jboss-amq-6/amq-openshift"
+
+repos="${ose3_base_repos} ${ose3_s2i_repos} ${xpaas_repos}"
+
+for r in $repos;
+do
+   hammer --username ${USER} --password ${PASSWORD} repository create --name=${r} --organization="${ORGANIZATION}" --product="${PRODUCT}" --content-type='docker' --url='https://registry.access.redhat.com' --docker-upstream-name=${r} --publish-via-http="true"
+done
+hammer --username ${USER} --password ${PASSWORD} product synchronize --organization="${ORGANIZATION}" --name="${PRODUCT}"
+----
+
+After you've created all of the repos refresh your browser and navigate to the list of
+image repositories, select one of the repositories such as *openshift3/ose-deployer*
+make note of the *Published At* field as we'll need to configure OpenShift to use
+this later, it should be something like this.
+
+----
+satellite.example.com:5000<1>/openshift<2>-openshift_images<3>-openshift3_ose-deployer<4>
+----
+<1> Your Satellite hostname with 5000 as we made it available over http
+<2> Your organization's label, all lowercase with underscores replacing spaces
+<3> Your product label, all lowercase with underscores replacing spaces
+<4> The repository name with underscores replacing slashes
+
+Your satellite now has the necessary content to deploy your environment. Please
+create content views and configure your hosts to utilize your satellite for Red Hat
+content per your organization's needs, the https://access.redhat.com/documentation/en-US/Red_Hat_Satellite/6.0/html/User_Guide/index.html[Satellite User Guide] covers
+those topics in depth.
+
+== Configure your OpenShift Environment
+After you've ensured that all of the content has been synchronized you may now
+begin provisioning your OpenShift environment. Please follow the
+link:advanced_install.html[Advanced Install] procedures, the only modification
+that needs to be made is to adjust the *oreg_url* value to point at your satellite.
+
+Set *oreg_url* according to your Satellite image repository path noted
+above.
+
+----
+oreg_url=satellite.example.com:5000/openshift-openshift_images-openshift3_ose-${component}:${version}
+----
+
+Next provision your registry and router ensuring that you alter the --images value
+to use your satellite.
+After you've provisioned your environment update the installed image streams to
+point at your satellite, then recreate them.
+
+----
+oadm router --credentials='/etc/openshift/master/openshift-router.kubeconfig' --images='satellite.example.com:5000/openshift-openshift_images-openshift3_ose-${component}:${version}' --service-account=router
+oadm registry --credentials='/etc/openshift/master/openshift-registry.kubeconfig' --images='satellite.example.com:5000/openshift-openshift_images-openshift3_ose-${component}:${version}'
+----
+
+Finally, use sed to update the image streams to reference those on your satellite
+then recreate them.
+
+----
+sed -i 's|registry.access.redhat.com/openshift3/|satellite.:5000/openshift-openshift_images-openshift3_|g' /usr/share/openshift/examples/image-streams/image-streams-rhel7.json
+sed -i 's|registry.access.redhat.com/jboss-amq-6/|satellite.example.com:5000/openshift-openshift_images-jboss-amq-6_|g' /usr/share/openshift/examples/xpaas-streams/jboss-image-streams.json
+sed -i 's|registry.access.redhat.com/jboss-eap-6/|satellite.example.com:5000/openshift-openshift_images-jboss-eap-6_|g' /usr/share/openshift/examples/xpaas-streams/jboss-image-streams.json
+sed -i 's|registry.access.redhat.com/jboss-webserver-3/|satellite.example.com:5000/openshift-openshift_images-jboss-webserver-3_|g' /usr/share/openshift/examples/xpaas-streams/jboss-image-streams.json
+oc delete images --all -n openshift
+oc replace -n openshift -f /usr/share/openshift/examples/image-streams/image-streams-rhel7.json -f /usr/share/openshift/examples/xpaas-streams/jboss-image-streams.json
+----
+
+At this point you should be able to deploy sample applications without pulling
+content from registry.access.redhat.com or dockerhub. Please note that most examples
+clone github.com repos so if your host is truly air gapped you'll need to account
+for that as well.
