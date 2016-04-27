@@ -311,7 +311,7 @@ re-configured after deployment.
 
 If your hosts require use of a HTTP or HTTPS proxy in order to connect to
 external hosts, there are many components that must be configured to use the
-proxy, including masters, nodes, Docker, and builds. In order to simplify this
+proxy, including masters, Docker, and builds. In order to simplify this
 configuration, the following Ansible variables can be specified at a cluster
 level to apply these settings uniformly across your environment.
 
@@ -333,20 +333,20 @@ environment is defined for builds.
 
 |`*openshift_http_proxy*`
 |This variable specifies the `*HTTP_PROXY*` environment variable for masters,
-nodes, and the Docker daemon.
+and the Docker daemon.
 
 |`*openshift_https_proxy*`
 |This variable specifices the `*HTTPS_PROXY*` environment variable for masters,
-nodes, and the Docker daemon.
+and the Docker daemon.
 
 |`*openshift_no_proxy*`
 |This variable is used to set the `*NO_PROXY*` environment variable for masters,
-nodes, and the Docker daemon. This value should be set to a comma separated list
+and the Docker daemon. This value should be set to a comma separated list
 of host names or wildcard host names that should not use the defined proxy. This
 list will be augmented with the list of all defined OpenShift host names by
 default.
 
-|`*openshift_no_proxy_auto_include_hostnames*`
+|`*openshift_generate_no_proxy_hosts*`
 |This boolean variable specifies whether or not the names of all defined
 OpenShift hosts and `pass:[*.cluster.local]` should be automatically appended to the
 `*NO_PROXY*` list. Defaults to *true*; set it to *false* to override this
