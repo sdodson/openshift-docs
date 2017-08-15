@@ -1,0 +1,25 @@
+[[install-config-upgrading-known-issues]]
+= Overview
+{product-author}
+{product-version}
+:data-uri:
+:icons:
+:experimental:
+:prewrap!:
+
+When upgrading your cluster there are two primary data migrations that take. The
+first occurs while still running the current version and the second happens after
+the upgrade completes.
+
+If the pre-upgrade migration fails the upgrade will be halted and the admin will
+need to resolve any data consistency problems before attempting the upgrade again.
+If the post-upgrade migration fails the upgrade will complete and the admin should
+investigate the data migration issues as soon as possible. This document will
+catalog known data consistency problems and how to resolve them.
+
+
+== Bug 123456
+Error message
+
+=== Remediation
+run etcdctl2 delete /openshift.io/foo/bar for each offending key
