@@ -227,7 +227,7 @@ $ docker pull registry.access.redhat.com/openshift3/ose-control-plane:<tag>
 $ docker pull registry.access.redhat.com/openshift3/registry-console:<tag>
 $ docker pull registry.access.redhat.com/openshift3/snapshot-controller:<tag>
 $ docker pull registry.access.redhat.com/openshift3/snapshot-provisioner:<tag>
-$ docker pull registry.access.redhat.com/rhel7/etcd
+$ docker pull registry.access.redhat.com/rhel7/etcd:3.2.22
 
 ----
 
@@ -437,6 +437,7 @@ $ docker save -o ose3-images.tar \
     registry.access.redhat.com/openshift3/prometheus-node-exporter \
     registry.access.redhat.com/openshift3/snapshot-controller \
     registry.access.redhat.com/openshift3/snapshot-provisioner \
+    registry.access.redhat.com/rhel7/etcd:3.2.22 \
     registry.access.redhat.com/cloudforms46/cfme-openshift-postgresql \
     registry.access.redhat.com/cloudforms46/cfme-openshift-memcached \
     registry.access.redhat.com/cloudforms46/cfme-openshift-app-ui \
@@ -595,8 +596,8 @@ $ scp /var/www/html/repos/images/ose3-images.tar root@<openshift_host_name>:
 $ ssh root@<openshift_host_name> "docker load -i ose3-images.tar"
 $ scp /var/www/html/images/ose3-builder-images.tar root@<openshift_master_host_name>:
 $ ssh root@<openshift_master_host_name> "docker load -i ose3-builder-images.tar"
-$ ssh root@<openshift_master_host_name> "ose3-logging-metrics-images.tar"
-$ ssh root@<openshift_master_host_name> "ose3-builder-images.tar"
+$ scp /var/www/html/images/ose3-builder-images.tar root@<openshift_master_host_name>:
+$ ssh root@<openshift_master_host_name> "docker load -i ose3-logging-metrics-images.tar"
 ----
 
 . Finish preparing the hosts for installation. Follow the
