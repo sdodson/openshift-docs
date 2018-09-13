@@ -46,16 +46,18 @@ during installation preparation.
 * Provide a source control repository. After installation, your nodes must
 access source code in a source code repository, such as
 Git.
-
++
 When building applications in {product-title}, your build might contain
 external dependencies, such as a Maven Repository or Gem files for Ruby
 applications.
+
+* Provide access to 
 
 [NOTE]
 ====
 You can use a
 http://www.redhat.com/en/technologies/linux-platforms/satellite[Red Hat
-Satellite] server to provides access to Red Hat content via an intranet or
+Satellite] server to provide access to Red Hat content via an intranet or
 LAN. For environments with Satellite, you can synchronize the {product-title}
 software onto the Satellite for use with the {product-title} servers.
 
@@ -497,7 +499,7 @@ $ docker save -o ose3-builder-images.tar \
 == Prepare and populate the repository server
 
 During the installation, and any future updates, you
-need a webserver to host the repositories. RHEL 7 can provide the Apache
+need a webserver to host the software. RHEL 7 can provide the Apache
 webserver.
 
 . Prepare the webserver:
@@ -548,6 +550,53 @@ $ systemctl enable httpd
 $ systemctl start httpd
 ----
 
+[[disconnected-standalone_registry]]
+== Installing and configuring a stand alone registry
+
+To avoid copying all the Docker images to each node host, install a
+standalone registry on your disconnected LAN to serve the images to your nodes.
+
+. On the webserver within your disconnected LAN,
+xref:../install/stand_alone_registry.adoc#install-config-installing-stand-alone-registry[install a stand alone registry].
++
+Note the domain name of your registry.
+
+. Create a namespace to store your images in your registry:
++
+----
+$ <add command>
+----
+
+. Load the images that you copied:
++
+[source, bash]
+----
+$ docker load -i ose3-images.tar
+$ docker load -i ose3-builder-images.tar
+$ docker load -i ose3-logging-metrics-images.tar
+<update list with more tar files>
+----
+
+. Tag the infrastructure component images:
++
+[source, bash]
+----
+$ docker tag registry.access.redhat.com/rhel7/etcd:3.2.22 registry.example.com/rhel7/etcd:3.2.22
+<add the rest of the images for this section>
+----
+
+. Push the infrastructure component images:
++
+[source, bash]
+----
+$ docker push registry.example.com/rhel7/etcd:3.2.22
+<add the rest of the images for this section>
+----
+
+. <add commands to tag and push images from the other sections>
+
+
+
 [[disconnected-openshift-systems]]
 == Preparing cluster hosts
 
@@ -587,19 +636,6 @@ gpgcheck=0
 <1> Replace `<server_IP>` with the IP address or host name of the Apache server
 that hosts the software repositories.
 
-. To import the relevant software and images, securely copy the images from the
-webserver to the individual {product-title} hosts:
-+
-[source, bash]
-----
-$ scp /var/www/html/repos/images/ose3-images.tar root@<openshift_host_name>:
-$ ssh root@<openshift_host_name> "docker load -i ose3-images.tar"
-$ scp /var/www/html/images/ose3-builder-images.tar root@<openshift_master_host_name>:
-$ ssh root@<openshift_master_host_name> "docker load -i ose3-builder-images.tar"
-$ scp /var/www/html/images/ose3-builder-images.tar root@<openshift_master_host_name>:
-$ ssh root@<openshift_master_host_name> "docker load -i ose3-logging-metrics-images.tar"
-----
-
 . Finish preparing the hosts for installation. Follow the
 xref:host_preparation.adoc#install-config-install-host-preparation[Preparing your hosts]
 steps, omitting the steps in the *Host Registration* section.
@@ -608,27 +644,30 @@ steps, omitting the steps in the *Host Registration* section.
 == Installing {product-title}
 
 After you prepare the hosts in your disconnected environment:
-* xref:configuring_inventory_file.adoc#configuring-ansible[Configure your
+
+. xref:configuring_inventory_file.adoc#configuring-ansible[Configure your
 inventory file].
-* xref:running_install.adoc#install-running-installation-playbooks[Run the
-installation playbooks].
 
-[IMPORTANT]
-====
-For
-xref:index.adoc#planning-installation-types[system container installations] on
-RHEL Atomic Host, to install the etcd container, you can set the Ansible variable
-`osm_etcd_image` to be the fully qualified name of the etcd image on
-your local registry, for example, `registry.example.com/rhel7/etcd`.
-====
+** If you configured a stand alone registry to host your Docker images, you must 
+set the following variables:
++
+----
+orge_url=registry.example.com/testing/ocp3/ose-${component}:${version}
+openshift_examples_modify_imagestreams=true
+----
 
-[NOTE]
-====
-If you want to
+** If you want to
 xref:stand_alone_registry.adoc#install-config-installing-stand-alone-registry[install a stand-alone registry],
 you must xref:disconnected-syncing-images[pull the *registry-console* container image]
 and set `deployment_subtype=registry` in your inventory file.
-====
+
+** xref:index.adoc#planning-installation-types[system container installations] on
+RHEL Atomic Host, to install the etcd container, you can set the Ansible variable
+`osm_etcd_image` to be the fully qualified name of the etcd image on
+your local registry, for example, `registry.example.com/rhel7/etcd`.
+
+. xref:running_install.adoc#install-running-installation-playbooks[Run the
+installation playbooks].
 
 [[disconnected-re-tagging-s2i-builder-images]]
 == Configuring S2I builder images and streams
