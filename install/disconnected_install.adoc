@@ -41,7 +41,13 @@ required images. If your organization's policies allow you to move the RHEL 7
 server that you download the required software repositories and container images
 to into your disconnected LAN, you can plan to reuse that server. If you cannot
 move the server into your disconnected LAN, then you create a separate webserver
-during installation preparation.
+during installation preparation. Options include:
+** Using a basic Apache webserver.
+** Using a
+http://www.redhat.com/en/technologies/linux-platforms/satellite[Red Hat
+Satellite] server to provide access to Red Hat content via an intranet or
+LAN. For environments with Satellite, you can synchronize the {product-title}
+software onto the Satellite for use with the {product-title} servers.
 
 * Provide a source control repository. After installation, your nodes must
 access source code in a source code repository, such as
@@ -51,21 +57,11 @@ When building applications in {product-title}, your build might contain
 external dependencies, such as a Maven Repository or Gem files for Ruby
 applications.
 
-* Provide access to 
-
-[NOTE]
-====
-You can use a
-http://www.redhat.com/en/technologies/linux-platforms/satellite[Red Hat
-Satellite] server to provide access to Red Hat content via an intranet or
-LAN. For environments with Satellite, you can synchronize the {product-title}
-software onto the Satellite for use with the {product-title} servers.
-
-https://access.redhat.com/documentation/en/red-hat-satellite/[Red Hat Satellite
-6.1] also introduces the ability to act as a Docker registry, and it can be used
-to host the {product-title} containerized components. Doing so is outside of the
-scope of this document.
-====
+* Provide a registry within the disconnected environment. Options include:
+** Installing a 
+xref:../install/stand_alone_registry.adoc#install-config-installing-stand-alone-registry[stand alone {product-title} registry].
+** Using a https://access.redhat.com/documentation/en/red-hat-satellite/[Red Hat Satellite
+6.1] server that acts as a Docker registry.
 
 ////
 For this reason, and because they might require certain tags, many
@@ -551,21 +547,16 @@ $ systemctl start httpd
 ----
 
 [[disconnected-standalone_registry]]
-== Installing and configuring a stand alone registry
+== Populate the registry
 
-To avoid copying all the Docker images to each node host, install a
-standalone registry on your disconnected LAN to serve the images to your nodes.
+Place the images that you pulled on the registry on your disconnected LAN so it
+can serve the images to your nodes.
 
-. On the webserver within your disconnected LAN,
-xref:../install/stand_alone_registry.adoc#install-config-installing-stand-alone-registry[install a stand alone registry].
-+
-Note the domain name of your registry.
-
-. Create a namespace to store your images in your registry:
-+
-----
-$ <add command>
-----
+[IMPORTANT]
+====
+The following steps are a generic guide to loading the images into a registry.
+You might need to take more or different actions to load the images.
+====
 
 . Load the images that you copied:
 +
@@ -574,23 +565,22 @@ $ <add command>
 $ docker load -i ose3-images.tar
 $ docker load -i ose3-builder-images.tar
 $ docker load -i ose3-logging-metrics-images.tar
-<update list with more tar files>
 ----
 
-. Tag the infrastructure component images:
+. Before you push the images into the registry, tag each component image that
+you loaded. For example, to tag the etcd image:
 +
 [source, bash]
 ----
 $ docker tag registry.access.redhat.com/rhel7/etcd:3.2.22 registry.example.com/rhel7/etcd:3.2.22
-<add the rest of the images for this section>
 ----
 
-. Push the infrastructure component images:
+. Push each infrastructure component image into the registry. For example, to
+push the etcd image:
 +
 [source, bash]
 ----
 $ docker push registry.example.com/rhel7/etcd:3.2.22
-<add the rest of the images for this section>
 ----
 
 . <add commands to tag and push images from the other sections>
