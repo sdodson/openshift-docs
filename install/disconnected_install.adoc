@@ -22,9 +22,6 @@ the disconnected environment.
 After the installation components are available to your node hosts, you install
 {product-title} by following the standard installation steps.
 
-After you install {product-title}, you must make the S2I builder images that you
-pulled available to the cluster.
-
 [[disconnected-prerequisites]]
 == Prerequisites
 
@@ -33,21 +30,13 @@ xref:../architecture/index.adoc#architecture-index[{product-title}'s overall arc
 and plan your environment topology.
 
 * Obtain a Red Hat Enterprise Linux (RHEL) 7 server that you have root access to
-with access to the Internet and at least 110 GB of disk space. You download the
+with access to the Internet and at least 110 GB of disk space. You will download the
 required software repositories and container images to this computer.
 
-* Plan to add a webserver within your disconnected environment to serve the software and
-required images. If your organization's policies allow you to move the RHEL 7
-server that you download the required software repositories and container images
-to into your disconnected LAN, you can plan to reuse that server. If you cannot
-move the server into your disconnected LAN, then you create a separate webserver
-during installation preparation. Options include:
-** Using a basic Apache webserver.
-** Using a
-http://www.redhat.com/en/technologies/linux-platforms/satellite[Red Hat
-Satellite] server to provide access to Red Hat content via an intranet or
-LAN. For environments with Satellite, you can synchronize the {product-title}
-software onto the Satellite for use with the {product-title} servers.
+* Plan to maintain a webserver within your disconnected environment to serve the
+mirrored repositories. You will copy the repositories from the Internet connected
+host to this webserver either over the network or via physical media in air gapped
+deployments.
 
 * Provide a source control repository. After installation, your nodes must
 access source code in a source code repository, such as
@@ -58,7 +47,7 @@ external dependencies, such as a Maven Repository or Gem files for Ruby
 applications.
 
 * Provide a registry within the disconnected environment. Options include:
-** Installing a 
+** Installing a
 xref:../install/stand_alone_registry.adoc#install-config-installing-stand-alone-registry[stand alone {product-title} registry].
 ** Using a https://access.redhat.com/documentation/en/red-hat-satellite/[Red Hat Satellite
 6.1] server that acts as a Docker registry.
@@ -93,7 +82,7 @@ import the GPG key:
 $ rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 ----
 
-. Register the server with the Red Hat Customer Portal. You must use the 
+. Register the server with the Red Hat Customer Portal. You must use the
 credentials that are associated with the account that has access to the
 {product-title} subscriptions:
 +
@@ -225,20 +214,22 @@ $ docker pull registry.access.redhat.com/openshift3/ose-control-plane:<tag>
 $ docker pull registry.access.redhat.com/openshift3/registry-console:<tag>
 $ docker pull registry.access.redhat.com/openshift3/snapshot-controller:<tag>
 $ docker pull registry.access.redhat.com/openshift3/snapshot-provisioner:<tag>
+$ docker pull registry.access.redhat.com/openshift3/apb-base:<tag>
+$ docker pull registry.access.redhat.com/openshift3/apb-tools:<tag>
+$ docker pull registry.access.redhat.com/openshift3/ose-service-catalog:<tag>
+$ docker pull registry.access.redhat.com/openshift3/ose-ansible-service-broker:<tag>
+$ docker pull registry.access.redhat.com/openshift3/mariadb-apb:<tag>
+$ docker pull registry.access.redhat.com/openshift3/mediawiki-apb:<tag>
+$ docker pull registry.access.redhat.com/openshift3/mysql-apb:<tag>
+$ docker pull registry.access.redhat.com/openshift3/ose-template-service-broker:<tag>
+$ docker pull registry.access.redhat.com/openshift3/postgresql-apb:<tag>
 $ docker pull registry.access.redhat.com/rhel7/etcd:3.2.22
 
 ----
 
-////
-[NOTE]
-====
-If you use NFS, you need the `ose-recycler` image. Otherwise, the volumes
-will not recycle, potentially causing errors.
-====
-////
 
 . Pull all of the required {product-title} component images for the
-additional centralized log aggregation and metrics aggregation components.
+optional components.
 ifdef::openshift-enterprise[]
 Replace `<tag>` with `{latest-int-tag}` for the latest version.
 endif::[]
@@ -294,27 +285,6 @@ https://access.redhat.com/support/offerings/techpreview/.
 endif::[]
 ====
 
-. For the service catalog, OpenShift Ansible broker, and template service broker
-features, as described in
-xref:configuring_inventory_file.adoc#enabling-service-catalog[Configuring Your Inventory File],
-pull the following images.
-ifdef::openshift-enterprise[]
-Replace `<tag>` with `{latest-tag}` for the latest version.
-endif::[]
-+
-[source, bash]
-----
-$ docker pull registry.access.redhat.com/openshift3/apb-base:<tag>
-$ docker pull registry.access.redhat.com/openshift3/apb-tools:<tag>
-$ docker pull registry.access.redhat.com/openshift3/ose-service-catalog:<tag>
-$ docker pull registry.access.redhat.com/openshift3/ose-ansible-service-broker:<tag>
-$ docker pull registry.access.redhat.com/openshift3/mariadb-apb:<tag>
-$ docker pull registry.access.redhat.com/openshift3/mediawiki-apb:<tag>
-$ docker pull registry.access.redhat.com/openshift3/mysql-apb:<tag>
-$ docker pull registry.access.redhat.com/openshift3/ose-template-service-broker:<tag>
-$ docker pull registry.access.redhat.com/openshift3/postgresql-apb:<tag>
-----
-
 . Pull the Red Hat-certified
 xref:../architecture/core_concepts/builds_and_image_streams.adoc#source-build[Source-to-Image
 (S2I)] builder images that you intend to use in your {product-title} environment.
@@ -328,10 +298,8 @@ For example, to pull both the previous and latest version of the Tomcat image:
 +
 [source, bash]
 ----
-$ docker pull \
-registry.access.redhat.com/jboss-webserver-3/webserver30-tomcat7-openshift:latest
-$ docker pull \
-registry.access.redhat.com/jboss-webserver-3/webserver30-tomcat7-openshift:1.1
+$ docker pull registry.access.redhat.com/jboss-webserver-3/webserver30-tomcat7-openshift:latest
+$ docker pull registry.access.redhat.com/jboss-webserver-3/webserver30-tomcat7-openshift:1.1
 ----
 ////
 +
@@ -373,8 +341,9 @@ $ docker pull registry.access.redhat.com/rhscl/mariadb-101-rhel7
 
 [[disconnected-preparing-images-for-export]]
 === Exporting images
-
-Export the images into compressed files:
+If your environment is air gapped and requires physical media to transfer content
+export the images into compressed files. If your host is connected to both the
+Internet and your internal networks you may skip to Prepare and populate the repository server[disconnected-repo-server]
 
 . Create a directory to store your compressed images in and change to it:
 +
@@ -456,22 +425,38 @@ For Red Hat support, a {gluster-native} subscription is required for `rhgs3/` im
 ====
 ////
 
-. If you synchronized the metrics and log aggregation images, export them:
+. If you synchronized images for optional components, export them:
 +
 [source, bash]
 ----
 $ docker save -o ose3-logging-metrics-images.tar \
     registry.access.redhat.com/openshift3/logging-auth-proxy \
     registry.access.redhat.com/openshift3/logging-curator \
-    registry.access.redhat.com/openshift3/logging-eventrouter \
     registry.access.redhat.com/openshift3/logging-elasticsearch \
+    registry.access.redhat.com/openshift3/logging-eventrouter \
     registry.access.redhat.com/openshift3/logging-fluentd \
     registry.access.redhat.com/openshift3/logging-kibana \
+    registry.access.redhat.com/openshift3/oauth-proxy \
     registry.access.redhat.com/openshift3/metrics-cassandra \
     registry.access.redhat.com/openshift3/metrics-hawkular-metrics \
     registry.access.redhat.com/openshift3/metrics-hawkular-openshift-agent \
     registry.access.redhat.com/openshift3/metrics-heapster \
-    registry.access.redhat.com/openshift3/metrics-schema-installer
+    registry.access.redhat.com/openshift3/metrics-schema-installer \
+    registry.access.redhat.com/openshift3/prometheus \
+    registry.access.redhat.com/openshift3/prometheus-alert-buffer \
+    registry.access.redhat.com/openshift3/prometheus-alertmanager \
+    registry.access.redhat.com/openshift3/prometheus-node-exporter \
+    registry.access.redhat.com/cloudforms46/cfme-openshift-postgresql \
+    registry.access.redhat.com/cloudforms46/cfme-openshift-memcached \
+    registry.access.redhat.com/cloudforms46/cfme-openshift-app-ui \
+    registry.access.redhat.com/cloudforms46/cfme-openshift-app \
+    registry.access.redhat.com/cloudforms46/cfme-openshift-embedded-ansible \
+    registry.access.redhat.com/cloudforms46/cfme-openshift-httpd \
+    registry.access.redhat.com/cloudforms46/cfme-httpd-configmap-generator \
+    registry.access.redhat.com/rhgs3/rhgs-server-rhel7 \
+    registry.access.redhat.com/rhgs3/rhgs-volmanager-rhel7 \
+    registry.access.redhat.com/rhgs3/rhgs-gluster-block-prov-rhel7 \
+    registry.access.redhat.com/rhgs3/rhgs-s3-server-rhel7
 ----
 
 . Export the S2I builder images that you pulled. For
@@ -490,6 +475,16 @@ $ docker save -o ose3-builder-images.tar \
     registry.access.redhat.com/openshift3/jenkins-slave-maven-rhel7 \
     registry.access.redhat.com/openshift3/jenkins-slave-nodejs-rhel7
 ----
+
+. Copy the tar files from your Internet connected host to your internal host.
+. Load the images that you copied:
++
+[source, bash]
+----
+$ docker load -i ose3-images.tar
+$ docker load -i ose3-builder-images.tar
+$ docker load -i ose3-logging-metrics-images.tar
+
 
 [[disconnected-repo-server]]
 == Prepare and populate the repository server
@@ -549,8 +544,7 @@ $ systemctl start httpd
 [[disconnected-standalone_registry]]
 == Populate the registry
 
-Place the images that you pulled on the registry on your disconnected LAN so it
-can serve the images to your nodes.
+On your internal host tag and push the images to your internal registry.
 
 [IMPORTANT]
 ====
@@ -558,25 +552,17 @@ The following steps are a generic guide to loading the images into a registry.
 You might need to take more or different actions to load the images.
 ====
 
-. Load the images that you copied:
-+
-[source, bash]
-----
-$ docker load -i ose3-images.tar
-$ docker load -i ose3-builder-images.tar
-$ docker load -i ose3-logging-metrics-images.tar
 ----
 
-. Before you push the images into the registry, tag each component image that
-you loaded. For example, to tag the etcd image:
+. Before you push the images into the registry, re-tag each image. For example,
+to tag the etcd image:
 +
 [source, bash]
 ----
 $ docker tag registry.access.redhat.com/rhel7/etcd:3.2.22 registry.example.com/rhel7/etcd:3.2.22
 ----
 
-. Push each infrastructure component image into the registry. For example, to
-push the etcd image:
+. Push each image into the registry. For example, to push the etcd image:
 +
 [source, bash]
 ----
@@ -594,7 +580,7 @@ Now that you have the installation files, prepare your hosts.
 
 . Create the hosts for your {product-title} cluster. It is recommended to use
 the latest version of RHEL 7 and to perform a minimal installation. Ensure that
-the hosts meet the 
+the hosts meet the
 xref:../install/prerequisites.adoc#install-config-install-prerequisites[system
 requirements].
 
@@ -636,25 +622,12 @@ steps, omitting the steps in the *Host Registration* section.
 After you prepare the hosts in your disconnected environment:
 
 . xref:configuring_inventory_file.adoc#configuring-ansible[Configure your
-inventory file].
-
-** If you configured a stand alone registry to host your Docker images, you must 
-set the following variables:
+inventory file] to reference your internal registry:
 +
 ----
 orge_url=registry.example.com/testing/ocp3/ose-${component}:${version}
 openshift_examples_modify_imagestreams=true
 ----
-
-** If you want to
-xref:stand_alone_registry.adoc#install-config-installing-stand-alone-registry[install a stand-alone registry],
-you must xref:disconnected-syncing-images[pull the *registry-console* container image]
-and set `deployment_subtype=registry` in your inventory file.
-
-** xref:index.adoc#planning-installation-types[system container installations] on
-RHEL Atomic Host, to install the etcd container, you can set the Ansible variable
-`osm_etcd_image` to be the fully qualified name of the etcd image on
-your local registry, for example, `registry.example.com/rhel7/etcd`.
 
 . xref:running_install.adoc#install-running-installation-playbooks[Run the
 installation playbooks].
@@ -686,7 +659,7 @@ $ htpasswd -b /etc/openshift/openshift-passwd <admin_username> <password>
 ----
 
 .. Log in to {product-title} as the new user to create that account in the
-{product-title} database. If you use the self-signed certificates generated 
+{product-title} database. If you use the self-signed certificates generated
 during installation:
 +
 [source, bash]
@@ -722,7 +695,7 @@ into the {product-title} Docker registry:
 $ oc adm policy add-role-to-user system:image-builder <admin_username>
 ----
 
-.. Grant the administrative role to the new user in the *openshift* project so 
+.. Grant the administrative role to the new user in the *openshift* project so
 you can edit the *openshift* project by pushing the container images:
 +
 [source, bash]
@@ -806,7 +779,7 @@ to reference your internal Docker registry.
 
 . Load the container images:
 
-.. Log in to the Docker registry using the token for user that you created and 
+.. Log in to the Docker registry using the token for user that you created and
 the registry service IP address:
 +
 [source, bash]
