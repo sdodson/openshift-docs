@@ -18,8 +18,11 @@ The `fast-{product-version}` channel is updated with new versions of {product-ve
 
 [id="stable-version-channel_{context}"]
 == stable-{product-version} channel
-While the `fast-{product-version}` channel contains releases as soon as their errata are published, releases are added to the `stable-{product-version}` channel after a delay. During this delay, data is collected from multiple sources and continuously analyzed for indications of product regressions. Once a statistically significant number of data points have been collected and absent negative signals these releases are added to the stable channel. Because the time required to
-obtain a statistically significant number of data points varies based on many factors we offer no SLA for the delay duration between fast and stable channels.
+While the `fast-{product-version}` channel contains releases as soon as their errata are published, releases are added to the `stable-{product-version}` channel after a delay. During this delay, data is collected from multiple sources and continuously analyzed for indications of product regressions. Once a statistically significant number of data points have been collected and absent negative signals these releases are added to the stable channel.
+
+[NOTE]
+Because the time required to obtain a statistically significant number of data points varies based on many factors we offer no SLA for the delay duration between fast and stable channels. Please see link:strategies_{context}[Fast and stable channel use and strategies] for more information.
+
 
 Newly installed clusters default to utilizing stable channels.
 
@@ -35,52 +38,62 @@ Both standard and non-EUS subscribers can access all EUS repositories and necess
 
 == candidate-{product-version} channel
 
-The `candidate-{product-version}` channel contains releases as soon as they're produced, prior to being declared GA. Releases present only in the candidate channels have not completed full Quality Assurance testing and lack Red Hat Support. Therefore releases present only in the candidate channels are only suitable for testing purposes where destroying and recreating a cluster is acceptable. Additionally, we provide no guarantee that updates from these releases to GA releases will be offered.
+The `candidate-{product-version}` channel contains releases as soon as they're produced, prior to being declared GA. Releases present only in the candidate channels have not completed full Quality Assurance testing and lack Red Hat Support. Therefore releases present only in the candidate channels are only suitable for testing purposes where destroying and recreating a cluster is acceptable. Additionally, we provide no guarantee that these releases will be offered update paths to GA versions.
 
 ifdef::openshift-origin[]
 [id="stable-4-channel_{context}"]
 == stable-4 channel
-Releases are added to the `stable-4` channel after passing all tests.
-
+Releases are added to the `stable-4` channel after passing all tests and stable-4 is the only supported channel.
 endif::openshift-origin[]
+
+
 
 [id="upgrade-version-paths_{context}"]
 == Update version paths
 
-{product-title} maintains an update recommendation service that understands the version of {product-title} you have installed as well as the path to take within the channel you choose to get you to the next release.
+{product-title} maintains an update recommendation service that understands the version of {product-title} you have installed as well as the path to take within the channel you choose to get you to the next release. Update paths are also limited to versions relevant to your currently selected channel and its promotion characteristics.
 
-ifndef::openshift-origin[]
-You can imagine seeing the following in the `fast-{product-version}` channel:
-endif::openshift-origin[]
-ifdef::openshift-origin[]
-You can imagine seeing the following in the `stable-4` channel:
-endif::openshift-origin[]
+You can imagine seeing the following releases in your channel:
 
 * {product-version}.0
 * {product-version}.1
 * {product-version}.3
 * {product-version}.4
 
-The service recommends only updates that have been tested and have no serious issues. It will not suggest updating to a version of {product-title} that contains known vulnerabilities. For example, if your cluster is on {product-version}.1 and {product-title} suggests {product-version}.4, then it is safe for you to update from {product-version}.1 to {product-version}.4. Do not rely on consecutive patch numbers. In this example, {product-version}.2 is not and never was available in the channel.
+The service recommends only updates that have been tested and have no known serious regressions. For example, if your cluster is on {product-version}.1 and {product-title} suggests {product-version}.4, then it is safe for you to update from {product-version}.1 to {product-version}.4. Do not rely on consecutive patch numbers. In this example, {product-version}.2 is not and never was available in the channel, therefore updates to {product-version}.2 are neither recommended nor supported.
 
-ifndef::openshift-origin[]
-Update stability depends on your channel. The presence of an update recommendation in the `candidate-{product-version}` channel does not imply that the update is supported. It means that no serious issues have been found with the update yet, but there might not be significant traffic through the update to suggest stability. The presence of an update recommendation in the `fast-{product-version}` or `stable-{product-version}` channels at any point is a declaration that the update is supported. While releases will never be removed from a channel, update recommendations that exhibit serious issues will be removed or made conditional from all channels. When an update recommendation is supported, it remains supported for the life of {product-version}, even if the update recommendation is later dropped or made conditional.
+[id="update-recommendation-removal"]
+== Update recommendation removals
+Red Hat monitors newly released versions and update paths associated with those versions both before and after they're added to supported channels. When a serious regression is identified Red Hat may remove affected update recommendations. If Red Hat chooses to remove update recommendations that action is taken in all relevant channels, simultaneously. The removal of recommended updates may happen either before or well after updates have been offered in supported channels.
 
-Red Hat will eventually provide supported update paths from any supported release in the `fast-{product-version}` or `stable-{product-version}` channels to the latest release in {product-version}.z, although there can be delays while safe paths away from troubled releases are constructed and verified.
-endif::openshift-origin[]
+In the event that Red Hat removes update recommendations from any supported release we will eventually provide a superseding update paths to a future version which corrects the regression. There may however be a delay while the defect is corrected, tested, and promoted.
 
-ifdef::openshift-origin[]
-The presence of an update recommendation in the `stable-4` channel at any point is a declaration that the update is supported. While releases will never be removed from the channel, update recommendations that exhibit serious issues will be removed or made conditional from all channels. When an update recommendation is supported, it remains supported for the life of {product-version}, even if the update recommendation is later dropped or made conditional.
-endif::openshift-origin[]
+When update recommendations are removed from supported channels those update paths remain supported but are no longer recommended. All supported but not recommended update paths updating from {product-title} version 4.10 and later will have a descriptive message and reference URL which links to more thorough explanation for the recommendation removal. Please review the linked reference and carefully consider whether you wish to continue with an update which is no longer recommended. See link:conditional-updates-overview_{context}[Conditional Updates] section for more information on this feature.
+
+
 
 ifndef::openshift-origin[]
 
 [id="fast-stable-channel-strategies_{context}"]
-== Fast and stable channel use and strategies
+== Choosing the correct channel for your cluster
 
-The `fast-{product-version}` and `stable-{product-version}` channels present a choice between receiving general availability releases as soon as they are available or allowing Red Hat to control the rollout of those updates. If issues are detected during rollout or at a later time, updates to that version might be blocked in both the `fast-{product-version}` and `stable-{product-version}` channels, and a new version might be introduced that becomes the new preferred update target.
+Because update recommendations available in both `fast-{product-version}` and `stable-{product-version}` are fully supported and benefit equally from extensive data analysis the choice between the two channels should be guided based on your specific needs rather than which channel is the default or qualities implied by the channel names. Largely this is a choice between updating to the latest GA versions or waiting while Red Hat collects additional data before promoting to the stable channel.
 
-Customers can improve this process by configuring pre-production systems on the `fast-{product-version}` channel, configuring production systems on the `stable-{product-version}` channel, and participating in the Red Hat connected customer program. Red Hat uses this program to observe the impact of updates on your specific hardware and software configurations. Future releases might improve or alter the pace at which updates move from the `fast-{product-version}` to the `stable-{product-version}` channel.
+Customers can improve this process by configuring pre-production systems on the `fast-{product-version}` channel, configuring production systems on the `stable-{product-version}` channel, and participating in the Red Hat connected customer program. Red Hat uses this program to observe the impact of updates on your specific hardware and software configurations.
+
+Additionally, there are several factors which may lead an organization to move even production clusters to the fast channel either permanently or temporarilly including:
+ - The desire to apply a specific fix known to affect your environment without delay.
+ - Application of CVE fixes without delay -- Because even CVE fixes may introduce regressions we still apply promotion delays to z-streams with CVE fixes.
+ - Internal pre-prod promotion processes -- If it takes your organization several weeks to promote updates between environments it would be best to use the latest available rather than introducing additional weeks or months of delay.
+
+=== Minor version initial update rollouts
+
+Because the scope of changes associated with a z-stream update is orders of magnitude lower than the scope of changes between any two minor versions our data collection requirements are similarly orders of magnitude different as well. While we can safely promote z-stream updates within a week or two of GA we cannot do the same with minor version updates. Therefore, it's expected that the initial availability of update recommendations to the latest minor may take 45-90 days.
+
+Given this lengthy data collection phase it's important that any organization which has their own lengthy production qualification processes begin testing at GA rather than waiting for stable channel update recommendations to become available. Waiting for stable channel update edges only further delays defect resolution of any defect unique to your usecase or environment.
+
+
+
 endif::openshift-origin[]
 
 [id="restricted-network-clusters_{context}"]
