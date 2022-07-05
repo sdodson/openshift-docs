@@ -14,7 +14,7 @@
 ifndef::openshift-origin[]
 [id="fast-version-channel_{context}"]
 == fast-{product-version} channel
-The `fast-{product-version}` channel is updated with new versions of {product-version} as soon as Red Hat declares the given version as a general availability (GA) release. As such, these releases are fully supported, are production quality, and have had errata notices delivered.
+The `fast-{product-version}` channel is updated with new versions of {product-version} as soon as Red Hat declares the given version as a general availability (GA) release. As such, these releases are fully commercially supported and purposed to be used in production environments.
 
 [id="stable-version-channel_{context}"]
 == stable-{product-version} channel
