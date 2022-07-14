@@ -29,7 +29,7 @@ Newly installed clusters default to utilizing stable channels.
 [id="eus-4y-channel_{context}"]
 == eus-4.y channel
 
-In addition to the stable channel, all even-numbered minor versions of {product-title} offer an link:https://access.redhat.com/support/policy/updates/openshift#ocp4_phases[Extended Update Support] (EUS). Releases which are promoted to the stable channel are also simultaneously promoted to the EUS channels. The primary purpose of the EUS channels is to serve as a convenience for clusters performing an EUS-to-EUS update.
+In addition to the stable channel, all even-numbered minor versions of {product-title} offer link:https://access.redhat.com/support/policy/updates/openshift#ocp4_phases[Extended Update Support] (EUS). Releases which are promoted to the stable channel are also simultaneously promoted to the EUS channels. The primary purpose of the EUS channels is to serve as a convenience for clusters performing an EUS-to-EUS update.
 
 [NOTE]
 ====
@@ -60,7 +60,7 @@ You can imagine seeing the following releases in your channel:
 * {product-version}.3
 * {product-version}.4
 
-The service recommends only updates that have been tested and have no known serious regressions. For example, if your cluster is on {product-version}.1 and {product-title} suggests {product-version}.4, then it is safe for you to update from {product-version}.1 to {product-version}.4. Do not rely on consecutive patch numbers. In this example, {product-version}.2 is not and never was available in the channel, therefore updates to {product-version}.2 are neither recommended nor supported.
+The service recommends only updates that have been tested and have no known serious regressions. For example, if your cluster is on {product-version}.1 and {product-title} suggests {product-version}.4, then it is recommended to update from {product-version}.1 to {product-version}.4. Do not rely on consecutive patch numbers. In this example, {product-version}.2 is not and never was available in the channel, therefore updates to {product-version}.2 are neither recommended nor supported.
 
 [id="update-recommendation-removal"]
 == Update recommendation removals
