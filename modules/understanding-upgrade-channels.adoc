@@ -38,7 +38,7 @@ Both standard and non-EUS subscribers can access all EUS repositories and necess
 
 == candidate-{product-version} channel
 
-The `candidate-{product-version}` channel contains releases as soon as they're produced, prior to being declared GA. Releases present only in the candidate channels have not completed full Quality Assurance testing and lack Red Hat Support. Therefore releases present only in the candidate channels are only suitable for testing purposes where destroying and recreating a cluster is acceptable. Additionally, we provide no guarantee that these releases will be offered update paths to GA versions.
+The `candidate-{product-version}` channel contains releases as soon as they're produced, prior to being declared GA. Releases present only in the candidate channels have not completed full Quality Assurance testing and lack Red Hat Support. Therefore releases present only in the candidate channels are only suitable for testing purposes where destroying and recreating a cluster is acceptable. Additionally, we provide no guarantee that these releases will be offered supported update paths to GA versions.
 
 ifdef::openshift-origin[]
 [id="stable-4-channel_{context}"]
@@ -66,7 +66,7 @@ The service recommends only updates that have been tested and have no known seri
 == Update recommendation removals
 Red Hat monitors newly released versions and update paths associated with those versions both before and after they're added to supported channels. When a serious regression is identified Red Hat may remove affected update recommendations. If Red Hat chooses to remove update recommendations that action is taken in all relevant channels, simultaneously. The removal of recommended updates may happen either before or well after updates have been offered in supported channels.
 
-In the event that Red Hat removes update recommendations from any supported release we will eventually provide a superseding update paths to a future version which corrects the regression. There may however be a delay while the defect is corrected, tested, and promoted.
+In the event that Red Hat removes update recommendations from any supported release we will eventually provide a superseding update recommendation to a future version which corrects the regression. There may however be a delay while the defect is corrected, tested, and promoted.
 
 When update recommendations are removed from supported channels those update paths remain supported but are no longer recommended. All supported but not recommended update paths updating from {product-title} version 4.10 and later will have a descriptive message and reference URL which links to more thorough explanation for the recommendation removal. Please review the linked reference and carefully consider whether you wish to continue with an update which is no longer recommended. See link:conditional-updates-overview_{context}[Conditional Updates] section for more information on this feature.
 
