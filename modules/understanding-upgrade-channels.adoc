@@ -88,7 +88,7 @@ Additionally, there are several factors which may lead an organization to move e
 
 === Minor version initial update rollouts
 
-Because the scope of changes associated with a z-stream update is orders of magnitude lower than the scope of changes between any two minor versions our data collection requirements are similarly orders of magnitude different as well. While we can safely promote z-stream updates within a week or two of GA we cannot do the same with minor version updates. Therefore, it's expected that the initial availability of update recommendations to the latest minor may take 45-90 days.
+Because the scope of changes associated with a z-stream update is orders of magnitude lower than the scope of changes between any two minor versions our data collection requirements are similarly orders of magnitude different as well. While we can safely promote z-stream updates within a week or two of GA we cannot do the same with minor version updates. Therefore, it's expected that the initial availability of update recommendations to the latest minor may take 45-90 days to appear in the stable channel.
 
 Given this lengthy data collection phase it's important that any organization which has their own lengthy production qualification processes begin testing at GA rather than waiting for stable channel update recommendations to become available. Waiting for stable channel update edges only further delays defect resolution of any defect unique to your usecase or environment.
 
