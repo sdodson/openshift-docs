@@ -77,11 +77,9 @@ ifndef::openshift-origin[]
 [id="fast-stable-channel-strategies_{context}"]
 == Choosing the correct channel for your cluster
 
-Because update recommendations available in both `fast-{product-version}` and `stable-{product-version}` are fully supported and benefit equally from extensive data analysis the choice between the two channels should be guided based on your specific needs rather than which channel is the default or qualities implied by the channel names. Largely this is a choice between updating to the latest GA versions or waiting while Red Hat collects additional data before promoting to the stable channel.
+Because update recommendations available in both `fast-{product-version}` and `stable-{product-version}` are fully supported and benefit equally from extensive data analysis the choice between the two channels should be guided based on your specific needs rather than which channel is the default or qualities implied by the channel names. Largely this is a choice between updating to the latest GA versions as soon as Red Hat is willing to offer support or waiting while Red Hat collects additional data before promoting to the stable channel.
 
-Customers can improve this process by configuring pre-production systems on the `fast-{product-version}` channel, configuring production systems on the `stable-{product-version}` channel, and participating in the Red Hat connected customer program. Red Hat uses this program to observe the impact of updates on your specific hardware and software configurations.
-
-Additionally, there are several factors which may lead an organization to move even production clusters to the fast channel either permanently or temporarilly including:
+Additionally, there are several factors which may lead an organization to move clusters to the fast channel either permanently or temporarilly including:
  - The desire to apply a specific fix known to affect your environment without delay.
  - Application of CVE fixes without delay -- Because even CVE fixes may introduce regressions we still apply promotion delays to z-streams with CVE fixes.
  - Internal pre-prod promotion processes -- If it takes your organization several weeks to promote updates between environments it would be best to use the latest available rather than introducing additional weeks or months of delay.
