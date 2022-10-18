@@ -14,7 +14,7 @@ ifndef::openshift-origin[]
 {product-title} {product-version} offers the following update channels:
 
 * `stable-{product-version}`
-* `eus-4.y` (only when running an even-numbered 4.y cluster release, like 4.10)
+* `eus-4.y` (only offered for EUS versions and meant to facilitate upgrades between EUS versions)
 * `fast-{product-version}`
 * `candidate-{product-version}`
 
