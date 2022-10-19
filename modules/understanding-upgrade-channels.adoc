@@ -37,7 +37,10 @@ Both standard and non-EUS subscribers can access all EUS repositories and necess
 [id="candidate-version-channel_{context}"]
 == candidate-{product-version} channel
 
-The `candidate-{product-version}` channel contains releases as soon as they're produced, prior to being declared GA. Releases present only in the candidate channels have not completed full Quality Assurance testing and lack Red Hat Support. Therefore releases present only in the candidate channels are only suitable for testing purposes where destroying and recreating a cluster is acceptable. Additionally, we provide no guarantee that these releases will be offered supported update paths to GA versions.
+The `candidate-{product-version}` channel offers unsupported early access to releases as soon as they're built. Releases present only in candidate channels
+may not contain the full feature set of eventual GA releases or features may be removed prior to GA. Additionally, these releases have not been subject to full
+Red Hat Quality Assurance and may not offer update paths to later GA releases. Given these caveats the candidate channel is only suitable for testing purposes
+where destroying and recreating a cluster is acceptable.
 
 ifdef::openshift-origin[]
 [id="stable-4-channel_{context}"]
