@@ -9,8 +9,6 @@
 
 = Update channels
 
-[id="candidate-version-channel_{context}"]
-
 ifndef::openshift-origin[]
 [id="fast-version-channel_{context}"]
 == fast-{product-version} channel
@@ -36,6 +34,7 @@ In addition to the stable channel, all even-numbered minor versions of {product-
 Both standard and non-EUS subscribers can access all EUS repositories and necessary RPMs (`rhel-*-eus-rpms`) to be able to support critical purposes such as debugging and building drivers.
 ====
 
+[id="candidate-version-channel_{context}"]
 == candidate-{product-version} channel
 
 The `candidate-{product-version}` channel contains releases as soon as they're produced, prior to being declared GA. Releases present only in the candidate channels have not completed full Quality Assurance testing and lack Red Hat Support. Therefore releases present only in the candidate channels are only suitable for testing purposes where destroying and recreating a cluster is acceptable. Additionally, we provide no guarantee that these releases will be offered supported update paths to GA versions.
