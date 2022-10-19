@@ -64,14 +64,19 @@ You can imagine seeing the following releases in your channel:
 
 The service recommends only updates that have been tested and have no known serious regressions. For example, if your cluster is on {product-version}.1 and {product-title} suggests {product-version}.4, then it is recommended to update from {product-version}.1 to {product-version}.4. Do not rely on consecutive patch numbers. In this example, {product-version}.2 is not and never was available in the channel, therefore updates to {product-version}.2 are neither recommended nor supported.
 
-[id="update-recommendation-removal"]
-== Update recommendation removals
-Red Hat monitors newly released versions and update paths associated with those versions both before and after they're added to supported channels. When a serious regression is identified Red Hat may remove affected update recommendations. If Red Hat chooses to remove update recommendations that action is taken in all relevant channels, simultaneously. The removal of recommended updates may happen either before or well after updates have been offered in supported channels.
+[id="conditional-updates-overview_{context}"]
+== Update recommendation removals and Condtional Updates
+Red Hat monitors newly released versions and update paths associated with those versions both before and after they're added to supported channels. If a serious regression is identified Red Hat may remove affected update recommendations. When Red Hat chooses to remove update recommendations that action is taken in all relevant channels, simultaneously. The removal of recommended updates may happen either before or after updates have been promoted to supported channels.
 
-In the event that Red Hat removes update recommendations from any supported release we will eventually provide a superseding update recommendation to a future version which corrects the regression. There may however be a delay while the defect is corrected, tested, and promoted.
+In the event that Red Hat removes update recommendations from any supported release we will eventually provide a superseding update recommendation to a future version which corrects the regression. There may however be a delay while the defect is corrected, tested, and promoted to your selected channel.
 
-When update recommendations are removed from supported channels those update paths remain supported but are no longer recommended. All supported but not recommended update paths updating from {product-title} version 4.10 and later will have a descriptive message and reference URL which links to more thorough explanation for the recommendation removal. Please review the linked reference and carefully consider whether you wish to continue with an update which is no longer recommended. See link:conditional-updates-overview_{context}[Conditional Updates] section for more information on this feature.
+Beginning with {product-title} 4.10 whenever update recommendations are removed from supported channels they are replaced with Conditional Updates which declare one or more known risks. Each known risk may apply to all clusters or only clusters matching certain conditions such as having `Platform` set to `None`` or the CNI provider set to `OpenShiftSDN`. The Cluster Version Operator (CVO) continually evaluates known risks against the current cluster state. When no risks match, the update is recommended. You can update from the Administrator perspective on the web console, as well as the OpenShift CLI (`oc`).
 
+When an update is not recommended because a risk might apply, you can view the update from the OpenShift CLI (`oc`). If the cluster administrator evaluates the potential known risks and decides it is acceptable for the current cluster, the administrator can waive the safety guards and proceed to an update.
+
+[role="_additional-resources"]
+.Additional resources
+* For more information, see xref:../updating/updating-cluster-cli.adoc#update-conditional-upgrade-pathupdating-cluster-cli[Updating along a conditional upgrade path]
 
 
 ifndef::openshift-origin[]
@@ -125,11 +130,3 @@ Changing your channel might impact the supportability of your cluster. The follo
 
 * You can always switch from the `fast-{product-version}` channel to the `stable-{product-version}` channel. There is a possible delay of up to a day for the release to be promoted to `stable-{product-version}` if the current release was recently promoted.
 endif::openshift-origin[]
-
-[id="conditional-updates-overview_{context}"]
-== Conditional updates
-
-The OpenShift Update Service might declare conditionally recommended updates associated with known risks.
-The Cluster Version Operator (CVO) continually evaluates known risks associated with updates from the current {product-title} release to later releases.
-When no risks apply, the update is recommended. You can update from the Administrator perspective on the web console, as well as the OpenShift CLI (`oc`).
-When an update is not recommended because a risk might apply, you can view the update from the OpenShift CLI (`oc`). If the cluster administrator evaluates the potential known risks and decides it is acceptable for the current cluster, the administrator can waive the safety guards and proceed to an update.
