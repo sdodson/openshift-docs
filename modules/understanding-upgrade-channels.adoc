@@ -84,20 +84,16 @@ ifndef::openshift-origin[]
 [id="fast-stable-channel-strategies_{context}"]
 == Choosing the correct channel for your cluster
 
-Because update recommendations available in both `fast-{product-version}` and `stable-{product-version}` are fully supported and benefit equally from extensive data analysis the choice between the two channels should be guided based on your specific needs rather than which channel is the default or qualities implied by the channel names. Largely this is a choice between updating to the latest GA versions as soon as Red Hat is willing to offer support or waiting while Red Hat collects additional data before promoting to the stable channel.
+Choosing the appropriate channel involves two decisions.
+
+First, select the minor version you wish for your cluster to upgrade to. Selecting a channel which matches your current version ensures that you only apply z-stream updates and do not receive feature updates. Selecting an available channel which has a version greater than your current version will ensure that after one or more updates your cluster will have updated to that version. Your cluster will only be offered channels which match its current version, the next version, or the next EUS version. Due to the complexity involved in planning upgrades between versions many minors apart we do not offer channels which assist in planning upgrades beyond a single EUS-to-EUS update.
+
+Second, you should choose your desired rollout strategy. You may choose to update as soon as Red Hat declares a release GA by selecting from fast channels or you may wish to wait for Red Hat to promote releases to the stable channel. Update recommendations offered in the `fast-{product-version}` and `stable-{product-version}` are both fully supported and benefit equally from ongoing data analysis. The promotion delay before promoting release to the stable channel represets the only difference between the two channels. Updates to the latest z-streams are generally promoted to the stable channel within a week or two, however the delay when initially rolling out updates to the latest minor is much longer, generally 45-90 days. Please consider the promotion delay when choosing your desired channel as waiting for promotion to the stable channel may affect your scheduling plans.
 
 Additionally, there are several factors which may lead an organization to move clusters to the fast channel either permanently or temporarilly including:
  - The desire to apply a specific fix known to affect your environment without delay.
  - Application of CVE fixes without delay -- Because even CVE fixes may introduce regressions we still apply promotion delays to z-streams with CVE fixes.
- - Internal pre-prod promotion processes -- If it takes your organization several weeks to promote updates between environments it would be best to use the latest available rather than introducing additional weeks or months of delay.
-
-=== Minor version initial update rollouts
-
-Because the scope of changes associated with a z-stream update is orders of magnitude lower than the scope of changes between any two minor versions our data collection requirements are similarly orders of magnitude different as well. While we can safely promote z-stream updates within a week or two of GA we cannot do the same with minor version updates. Therefore, it's expected that the initial availability of update recommendations to the latest minor may take 45-90 days to appear in the stable channel.
-
-Given this lengthy data collection phase it's important that any organization which has their own lengthy production qualification processes begin testing at GA rather than waiting for stable channel update recommendations to become available. Waiting for stable channel update edges only further delays defect resolution of any defect unique to your usecase or environment.
-
-
+ - Internal testing processes -- If it takes your organization several weeks to qualify releases it's best test concurrently with our promotion process rather than waiting. This also assures that any telemetry signal provided to Red Hat is a factored into our rollout, we can fix issues relevant to you faster.
 
 endif::openshift-origin[]
 
