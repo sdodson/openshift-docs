@@ -70,9 +70,7 @@ Red Hat monitors newly released versions and update paths associated with those 
 
 In the event that Red Hat removes update recommendations from any supported release we will eventually provide a superseding update recommendation to a future version which corrects the regression. There may however be a delay while the defect is corrected, tested, and promoted to your selected channel.
 
-Beginning with {product-title} 4.10 whenever update recommendations are removed from supported channels they are replaced with Conditional Updates which declare one or more known risks. Each known risk may apply to all clusters or only clusters matching certain conditions such as having `Platform` set to `None`` or the CNI provider set to `OpenShiftSDN`. The Cluster Version Operator (CVO) continually evaluates known risks against the current cluster state. When no risks match, the update is recommended. You can update from the Administrator perspective on the web console, as well as the OpenShift CLI (`oc`).
-
-When an update is not recommended because a risk might apply, you can view the update from the OpenShift CLI (`oc`). If the cluster administrator evaluates the potential known risks and decides it is acceptable for the current cluster, the administrator can waive the safety guards and proceed to an update.
+Beginning with {product-title} 4.10 whenever update recommendations are removed from supported channels they are replaced with Conditional Updates which declare one or more known risks. Each known risk may apply to all clusters or only clusters matching certain conditions such as having `Platform` set to `None` or the CNI provider set to `OpenShiftSDN`. The Cluster Version Operator (CVO) continually evaluates known risks against the current cluster state. When no risks match, the update is recommended. If the risk matches those updates are listed as Supported But Not Recommended Updates, a reference link is provided which helps the cluster admin decide if they would like to accept the risk and update anyway.
 
 [role="_additional-resources"]
 .Additional resources
@@ -92,7 +90,7 @@ Second, you should choose your desired rollout strategy. You may choose to updat
 
 Additionally, there are several factors which may lead an organization to move clusters to the fast channel either permanently or temporarilly including:
  - The desire to apply a specific fix known to affect your environment without delay.
- - Application of CVE fixes without delay -- Because even CVE fixes may introduce regressions we still apply promotion delays to z-streams with CVE fixes.
+ - Application of CVE fixes without delay -- even CVE fixes may introduce regressions, so we still apply promotion delays to z-streams with CVE fixes.
  - Internal testing processes -- If it takes your organization several weeks to qualify releases it's best test concurrently with our promotion process rather than waiting. This also assures that any telemetry signal provided to Red Hat is a factored into our rollout, we can fix issues relevant to you faster.
 
 endif::openshift-origin[]
