@@ -19,10 +19,10 @@ The `fast-{product-version}` channel is updated with new versions of {product-ti
 While the `fast-{product-version}` channel contains releases as soon as their errata are published, releases are added to the `stable-{product-version}` channel after a delay. During this delay, data is collected from multiple sources and analyzed for indications of product regressions. Once a significant number of data points have been collected, and absent negative signals, these releases are added to the stable channel.
 
 [NOTE]
-Because the time required to obtain a statistically significant number of data points varies based on many factors we offer no Service LeveL Objective (SLO) for the delay duration between fast and stable channels. Please see link:strategies_{context}[Fast and stable channel use and strategies] for more information.
+Since the time required to obtain a significant number of data points varies based on many factors, Service LeveL Objective (SLO) is not offered for the delay duration between fast and stable channels. Please see link:strategies_{context}[Fast and stable channel use and strategies] for more information.
 
 
-Newly installed clusters default to utilizing stable channels.
+Newly installed clusters default to using stable channels.
 
 [id="eus-4y-channel_{context}"]
 == eus-4.y channel
@@ -53,7 +53,7 @@ endif::openshift-origin[]
 [id="upgrade-version-paths_{context}"]
 == Update version paths
 
-{product-title} maintains an update recommendation service that understands the version of {product-title} you have installed as well as the path to take within the channel you choose to get you to the next release. Update paths are also limited to versions relevant to your currently selected channel and its promotion characteristics.
+{product-title} maintains an update recommendation service that knows your installed {product-title} version and the path to take within the channel to get you to the next release. Update paths are also limited to versions relevant to your currently selected channel and its promotion characteristics.
 
 You can imagine seeing the following releases in your channel:
 
@@ -66,9 +66,9 @@ The service recommends only updates that have been tested and have no known seri
 
 [id="conditional-updates-overview_{context}"]
 == Update recommendation removals and Condtional Updates
-Red Hat monitors newly released versions and update paths associated with those versions both before and after they're added to supported channels. If a serious regression is identified Red Hat may remove affected update recommendations. When Red Hat chooses to remove update recommendations that action is taken in all relevant channels, simultaneously. The removal of recommended updates may happen either before or after updates have been promoted to supported channels.
+Red Hat monitors newly released versions and update paths associated with those versions before and after they are added to supported channels. If a serious regression is identified, Red Hat may remove affected update recommendations. When Red Hat chooses to remove update recommendations, that action is taken in all relevant channels simultaneously. The removal of recommended updates may happen either before or after updates have been promoted to supported channels.
 
-In the event that Red Hat removes update recommendations from any supported release we will eventually provide a superseding update recommendation to a future version which corrects the regression. There may however be a delay while the defect is corrected, tested, and promoted to your selected channel.
+If Red Hat removes update recommendations from any supported release, a superseding update recommendation will be provided to a future version that corrects the regression. There may however be a delay while the defect is corrected, tested, and promoted to your selected channel.
 
 Beginning with {product-title} 4.10 whenever update recommendations are removed from supported channels they are replaced with Conditional Updates which declare one or more known risks. Each known risk may apply to all clusters or only clusters matching certain conditions such as having `Platform` set to `None` or the CNI provider set to `OpenShiftSDN`. The Cluster Version Operator (CVO) continually evaluates known risks against the current cluster state. When no risks match, the update is recommended. If the risk matches those updates are listed as Supported But Not Recommended Updates and a reference link is provided which helps the cluster admin decide if they would like to accept the risk and update anyway.
 
