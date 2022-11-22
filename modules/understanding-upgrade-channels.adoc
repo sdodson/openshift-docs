@@ -16,7 +16,7 @@ The `fast-{product-version}` channel is updated with new versions of {product-ti
 
 [id="stable-version-channel_{context}"]
 == stable-{product-version} channel
-While the `fast-{product-version}` channel contains releases as soon as their errata are published, releases are added to the `stable-{product-version}` channel after a delay. During this delay, data is collected from multiple sources and continuously analyzed for indications of product regressions. Once a statistically significant number of data points have been collected and absent negative signals these releases are added to the stable channel.
+While the `fast-{product-version}` channel contains releases as soon as their errata are published, releases are added to the `stable-{product-version}` channel after a delay. During this delay, data is collected from multiple sources and analyzed for indications of product regressions. Once a significant number of data points have been collected, and absent negative signals, these releases are added to the stable channel.
 
 [NOTE]
 Because the time required to obtain a statistically significant number of data points varies based on many factors we offer no Service LeveL Objective (SLO) for the delay duration between fast and stable channels. Please see link:strategies_{context}[Fast and stable channel use and strategies] for more information.
