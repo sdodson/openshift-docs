@@ -19,7 +19,7 @@ The `fast-{product-version}` channel is updated with new versions of {product-ti
 While the `fast-{product-version}` channel contains releases as soon as their errata are published, releases are added to the `stable-{product-version}` channel after a delay. During this delay, data is collected from multiple sources and analyzed for indications of product regressions. Once a significant number of data points have been collected, and absent negative signals, these releases are added to the stable channel.
 
 [NOTE]
-Since the time required to obtain a significant number of data points varies based on many factors, Service LeveL Objective (SLO) is not offered for the delay duration between fast and stable channels. Please see xref:#fast-stable-channel-strategies_{context}[Fast and stable channel use and strategies] for more information.
+Since the time required to obtain a significant number of data points varies based on many factors, Service LeveL Objective (SLO) is not offered for the delay duration between fast and stable channels. Please see xref:../../updating/understanding-upgrade-channels-release.html#fast-stable-channel-strategies_{context}[Fast and stable channel use and strategies] for more information.
 
 
 Newly installed clusters default to using stable channels.
